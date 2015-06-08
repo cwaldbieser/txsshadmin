@@ -6,15 +6,16 @@ from twisted.conch import manhole_ssh
 from twisted.conch.checkers import (
     SSHPublicKeyChecker,
     UNIXAuthorizedKeysFiles)
-from twisted.conch.ssh.factory import SSHFactory
+from twisted.internet import endpoints
 from twisted.internet import reactor
-from twisted.conch.ssh.keys import Key
 from twisted.conch.insults import insults
 from twisted.conch.interfaces import IConchUser
 from twisted.conch.avatar import ConchUser
 from twisted.conch.manhole import ColoredManhole
 from twisted.conch.ssh import session
 from twisted.conch.ssh.channel import SSHChannel
+from twisted.conch.ssh.factory import SSHFactory
+from twisted.conch.ssh.keys import Key
 from twisted.python import log
 import sys
 
@@ -70,6 +71,15 @@ factory.portal = sshPortal
 #factory.portal.registerChecker(FilePasswordDB("ssh-passwords"))
 keydb = UNIXAuthorizedKeysFiles()
 factory.portal.registerChecker(SSHPublicKeyChecker(keydb))
-reactor.listenTCP(2022, factory)
+ep = endpoints.serverFromString(reactor, 'tcp:2022')
+d = ep.listen(factory)
+port_info = []
+
+def onListen(port):
+    port_info.append(port)
+    
+d.addCallback(onListen)
 reactor.run()
+for port in port_info:
+    port.stopListening()
 
