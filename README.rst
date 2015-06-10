@@ -17,7 +17,7 @@ Run Demos
 
 Custom protocol over SSH::
 
-    $ twistd -ny ./txsshadmin/proto_service.py
+    $ twistd -ny ./txsshadmin/demo.tac
 
 Manhole REPL over SSH::
 
