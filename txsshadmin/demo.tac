@@ -1,8 +1,8 @@
 
 from twisted.application.service import Application
-from txsshadmin.proto_service import SSHProtoService
+from txsshadmin.demo import SSHDemoService
 
 application = Application("Twisted SSH Service Demo")
-service = SSHProtoService()
+service = SSHDemoService()
 service.setServiceParent(application)
 

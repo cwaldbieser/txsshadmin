@@ -1,13 +1,10 @@
 
-from twisted.cred.portal import IRealm
-from twisted.conch.avatar import ConchUser
-from twisted.conch.insults.insults import ServerProtocol
-from twisted.conch.interfaces import IConchUser, ISession
-from twisted.conch.ssh.session import SSHSession, wrapProtocol
 from zope.interface import implements
+from txsshadmin.cred_base import SSHBaseAvatar, SSHBaseRealm
 from txsshadmin.proto_dispatcher import (
     makeSSHDispatcherProtocolFactory,
     BaseHandler)
+from txsshadmin.service import SSHServiceBase
 
 
 class DemoHandler(BaseHandler):
@@ -21,37 +18,16 @@ class DemoHandler(BaseHandler):
 SSHDemoProtocolFactory = makeSSHDispatcherProtocolFactory(DemoHandler)
 
 
-class SSHDemoAvatar(ConchUser):
-    implements(ISession)
-
+class SSHDemoAvatar(SSHBaseAvatar):
     protocolFactory = SSHDemoProtocolFactory
 
     def __init__(self, avatarId):
-        ConchUser.__init__(self)
-        self.avatarId = avatarId
-        self.channelLookup.update({'session': SSHSession})
-
-    def openShell(self, protocol):
-        serverProto = ServerProtocol(self.protocolFactory, self)
-        serverProto.makeConnection(protocol)
-        protocol.makeConnection(wrapProtocol(serverProto))
-
-    def getPty(self, terminal, windowSize, attrs):
-        return None
-
-    def execCommand(self, protocol, cmd):
-        raise NotImplementedError("Not implemented.")
-
-    def closed(self):
-        pass
+        SSHBaseAvatar.__init__(self, avatarId)
 
 
-class SSHDemoRealm(object):
-    implements(IRealm)
+class SSHDemoRealm(SSHBaseRealm):
+   avatarFactory = SSHDemoAvatar 
 
-    def requestAvatar(self, avatarId, mind, *interfaces):
-        if IConchUser in interfaces:
-            return IConchUser, SSHDemoAvatar(avatarId), lambda: None
-        else:
-            raise Exception("No supported interfaces found.")
+class SSHDemoService(SSHServiceBase):
+    realm = SSHDemoRealm()
 

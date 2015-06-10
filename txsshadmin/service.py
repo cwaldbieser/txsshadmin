@@ -7,17 +7,19 @@ from twisted.conch.checkers import (
 from twisted.conch.ssh.factory import SSHFactory
 from twisted.conch.ssh.keys import Key
 from twisted.internet import endpoints, reactor
-from txsshadmin.demo import SSHDemoRealm
 
 
-class SSHProtoService(Service):
+class SSHServiceBase(Service):
     reactor = reactor
-    realm = SSHDemoRealm()
+    realm = None
     endpointStr = 'tcp:2022'
     servicePrivateKey = 'keys/id_rsa'
     servicePublicKey = 'keys/id_rsa.pub'
 
     def startService(self):
+        assert self.realm is not None, (
+            "When subclassing SSHProtoService, assign a realm to the "
+            "`realm` attribute (e.g. an instance of `SSHDemoRealm`).")
         with open(self.servicePrivateKey) as privateBlobFile:
             privateBlob = privateBlobFile.read()
             privateKey = Key.fromString(data=privateBlob)
