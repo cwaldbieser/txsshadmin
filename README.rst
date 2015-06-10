@@ -1,3 +1,6 @@
+#######################################################
+Administrative Services for Twisted Python Applications
+#######################################################
 
 ===============================================
 Create SSH Server public key / private key pair
@@ -5,6 +8,7 @@ Create SSH Server public key / private key pair
 
 Example::
 
+    $ mkdir keys
     $ ckeygen -b 2048 -t rsa -f keys/id_rsa
 
 =========
