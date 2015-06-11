@@ -7,10 +7,21 @@ from twisted.conch.interfaces import IConchUser, ISession
 from twisted.conch.ssh.session import SSHSession, wrapProtocol
 from zope.interface import implements
 
+
+class ServerProtocol2(ServerProtocol):
+    clearOnExist = False
+
+    def loseConnection(self):
+        if self.clearOnExit:
+            self.reset()
+        self.transport.loseConnection()
+
+
 class SSHBaseAvatar(ConchUser):
     implements(ISession)
 
     protocolFactory = None
+    clearOnExit = False
 
     def __init__(self, avatarId):
         assert self.protocolFactory is not None, (
@@ -22,7 +33,8 @@ class SSHBaseAvatar(ConchUser):
         self.channelLookup.update({'session': SSHSession})
 
     def openShell(self, protocol):
-        serverProto = ServerProtocol(self.protocolFactory, self)
+        serverProto = ServerProtocol2(self.protocolFactory, self)
+        serverProto.clearOnExit = self.clearOnExit
         serverProto.makeConnection(protocol)
         protocol.makeConnection(wrapProtocol(serverProto))
 
