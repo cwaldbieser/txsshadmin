@@ -2,6 +2,7 @@
 
 from twisted.conch.recvline import HistoricRecvLine
 from twisted.python import log
+from textwrap import dedent
 
 def makeSSHDispatcherProtocolFactory(handlerFactory, *args, **kwds):
     
@@ -66,21 +67,50 @@ class BaseHandler(object):
     def onConnect(self, dispatcher):
         pass
 
-    def handle_help(self, dispatcher): 
+    def handle_help(self, dispatcher, *args): 
+        """
+        Get help on a command.
+        help [COMMAND]
+        """
         terminal = dispatcher.terminal
-        terminal.write(self.commandHelp)
-        terminal.nextLine()
+        if len(args) == 0:
+            terminal.write(self.commandHelp)
+            terminal.nextLine()
+            terminal.write("Use `help <command>` for help on a particular command.")
+            terminal.nextLine()
+        else:
+            cmd = args[0]
+            handler = "handle_{0}".format(cmd)
+            if hasattr(self, handler):
+                func = getattr(self, handler)
+                doc = dedent(func.__doc__)
+                lines = doc.split('\n')
+                for line in lines:
+                    terminal.write(line)
+                    terminal.nextLine()
+            else:
+                terminal.write("Unknown command, '{0}'.".format(cmd))
+                termnial.nextLine()
         
     def handle_whoami(self, dispatcher):
+        """
+        Show who you are logged in as.
+        """
         terminal = dispatcher.terminal
         terminal.write("You are '{0}'.".format(self.avatar.avatarId))
         terminal.nextLine()
         
     def handle_clear(self, dispatcher):
+        """
+        Clear the terminal.
+        """
         terminal = dispatcher.terminal
         terminal.reset()
 
     def handle_quit(self, dispatcher):
+        """
+        Exit this admin shell.
+        """
         terminal = dispatcher.terminal
         terminal.write("Goodbye.")
         terminal.nextLine()
