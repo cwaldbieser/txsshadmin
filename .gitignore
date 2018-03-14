@@ -1,2 +1,4 @@
 keys/
 *.pyc
+dist/
+txsshadmin.egg-info/
