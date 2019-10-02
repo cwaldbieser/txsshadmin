@@ -1,1 +1,1 @@
-Twisted==17.5.0
+Twisted==19.7.0
