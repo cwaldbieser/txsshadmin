@@ -120,7 +120,7 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'Twisted>=17,<20',
+        'Twisted>=17,<23',
     ],  # Optional
 
     python_requires='>=2.7, <3',
